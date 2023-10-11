@@ -13,6 +13,7 @@ class Config(BaseSettings):
 
     MPSTATS_LOGIN: str
     MPSTATS_PASS: str
+    X_API_KEY: str
 
 
 config = Config()
