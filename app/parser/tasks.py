@@ -43,7 +43,7 @@ def get_info_v2(wb_sku: str | int):
     item_name = Parser().get_wb_item_name(wb_sku)
     item_params = Utils.exclude_dim_info(Parser().get_wb_item_params(wb_sku))
     item_desc = Parser().get_wb_item_desc(wb_sku)
-    keywords = Parser(headless=True).parse_mpstats_by_sku(wb_sku)
+    keywords = Parser().parse_mpstats_by_sku(wb_sku)
     if not keywords:
         raise NoKeywordsException("No keywords")
     result = {
