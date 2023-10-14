@@ -100,7 +100,8 @@ class Parser:
         elements = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_any_elements_located(
                 (
-                    By.XPATH, "//a[@href and @title='Открыть в Wildberries' and " "@target='_blank']",
+                    By.XPATH,
+                    "//a[@href and @title='Открыть в Wildberries' and " "@target='_blank']",
                 )
             )
         )

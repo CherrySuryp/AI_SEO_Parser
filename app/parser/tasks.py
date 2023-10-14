@@ -11,11 +11,14 @@ class NoKeywordsException(Exception):
 
 
 @celery.task(
-    autoretry_for=(TimeoutException, NoKeywordsException,),
-    retry_kwargs={'max_retries': 3},
+    autoretry_for=(
+        TimeoutException,
+        NoKeywordsException,
+    ),
+    retry_kwargs={"max_retries": 3},
     default_retry_delay=1,
     soft_time_limit=120,
-    time_limit=125
+    time_limit=125,
 )
 def get_info_v1(wb_sku: str | int):
     item_name = Parser().get_wb_item_name(wb_sku)
@@ -23,21 +26,19 @@ def get_info_v1(wb_sku: str | int):
     keywords = Parser(headless=True).parse_mpstats_by_sku(wb_sku)
     if not keywords:
         raise NoKeywordsException("No keywords")
-    result = {
-        "name": item_name,
-        "params": item_params,
-        "desc": None,
-        "keywords": keywords
-    }
+    result = {"name": item_name, "params": item_params, "desc": None, "keywords": keywords}
     return result
 
 
 @celery.task(
-    autoretry_for=(TimeoutException, NoKeywordsException,),
-    retry_kwargs={'max_retries': 3},
+    autoretry_for=(
+        TimeoutException,
+        NoKeywordsException,
+    ),
+    retry_kwargs={"max_retries": 3},
     default_retry_delay=1,
     soft_time_limit=120,
-    time_limit=125
+    time_limit=125,
 )
 def get_info_v2(wb_sku: str | int):
     item_name = Parser().get_wb_item_name(wb_sku)
@@ -46,10 +47,5 @@ def get_info_v2(wb_sku: str | int):
     keywords = Parser().parse_mpstats_by_sku(wb_sku)
     if not keywords:
         raise NoKeywordsException("No keywords")
-    result = {
-        "name": item_name,
-        "params": item_params,
-        "desc": item_desc,
-        "keywords": keywords
-    }
+    result = {"name": item_name, "params": item_params, "desc": item_desc, "keywords": keywords}
     return result
