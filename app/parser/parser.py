@@ -96,6 +96,7 @@ class Parser:
         return int([i.text for i in elements][0])
 
     def _top_similar_item_by_item_name(self, item_name: str) -> int:
+        item_name = "+".join(item_name.split(" "))
         self._driver.get(f"https://mpstats.io/wb/bysearch?query={item_name}")
         elements = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_any_elements_located(
