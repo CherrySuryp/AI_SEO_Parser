@@ -23,3 +23,7 @@ services:
       - "9000:9000"
     depends_on:
       - celery
+networks:
+  AI_SEO:
+    external: True
+    name: "AI_SEO"
