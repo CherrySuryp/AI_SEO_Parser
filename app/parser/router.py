@@ -14,7 +14,8 @@ class TaskStatus(BaseModel):
 
 
 class ResultSchema(BaseModel):
-    params: Optional[dict]
+    name: Optional[str] = None
+    params: Optional[dict] = {}
     desc: Optional[str] = None
     keywords: Optional[list] = None
 
