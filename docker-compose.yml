@@ -3,7 +3,8 @@ services:
   redis:
     image: redis:7
     container_name: redis_ai_seo_parser
-
+    networks:
+      - AI_SEO
   celery:
     container_name: celery_mpstats
     build:
@@ -12,7 +13,8 @@ services:
               "--pool=gevent", "--concurrency=1"]
     depends_on:
       - redis
-
+    networks:
+      - AI_SEO
   fastapi:
     container_name: ai_seo_parser_api
     build:
@@ -23,6 +25,8 @@ services:
       - "9000:9000"
     depends_on:
       - celery
+    networks:
+      - AI_SEO
 networks:
   AI_SEO:
     external: True
