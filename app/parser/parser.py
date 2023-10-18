@@ -107,8 +107,12 @@ class Parser:
         Переход к ТОП-1 похожему товару
         """
         self._driver.get(f"https://kz.mpstats.io/wb/item/{wb_sku}")
-        elements = self._driver.find_elements(
-            By.XPATH, "//a[@href and @title='Открыть в Wildberries' and " "@target='_blank']"
+        elements = WebDriverWait(self._driver, 10).until(
+            ec.visibility_of_any_elements_located(
+                (
+                    By.XPATH, "//a[@href and @title='Открыть в Wildberries' and " "@target='_blank']"
+                )
+            )
         )
         return int([i.text for i in elements][0])
 
@@ -160,7 +164,6 @@ class Parser:
         """
         try:
             self._auth_pipeline()
-            time.sleep(5)
             top_item_sku = self._top_similar_item_by_sku(wb_sku=wb_sku)
             result = self._get_keywords(top_item_sku)
             self._driver.quit()
