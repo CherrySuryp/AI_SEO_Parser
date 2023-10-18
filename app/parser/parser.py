@@ -221,4 +221,4 @@ class Parser:
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
 
 
-print(Parser(headless=False).parse_mpstats_by_sku(31207272))
+# print(Parser(headless=False).parse_mpstats_by_sku(31207272))
