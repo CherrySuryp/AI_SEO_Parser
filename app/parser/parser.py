@@ -1,5 +1,6 @@
 import os
 import pickle
+import time
 
 from typing import Dict, List
 
@@ -17,8 +18,9 @@ from app.config import Config
 
 
 class Parser:
-    def __init__(self, keywords_count: int = 30, headless: bool = True):
+    def __init__(self, keywords_count: int = 30, headless: bool = True, save_cookies: bool = False):
         self._settings = Config()
+        self._save_cookies = save_cookies
         self._cookies_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "cookies")
         self._keywords_count = keywords_count
 
@@ -53,9 +55,15 @@ class Parser:
         """
         Авторизация на сайте с сохранением cookie в файл
         """
+        self._driver.get("https://mpstats.io")
+        time.sleep(2)
         self._driver.get("https://mpstats.io/login")
-        email_input = self._driver.find_element(By.ID, "email")
-        passwd_input = self._driver.find_element(By.NAME, "password")
+        email_input = WebDriverWait(self._driver, 10).until(
+            ec.visibility_of_element_located((By.ID, "email"))
+        )
+        passwd_input = WebDriverWait(self._driver, 10).until(
+            ec.visibility_of_element_located((By.NAME, "password"))
+        )
 
         email_input.clear()
         email_input.send_keys(self._settings.MPSTATS_LOGIN)
@@ -83,7 +91,7 @@ class Parser:
 
         else:
             print("Getting cookies")
-            self._authorize(save_cookies=True)
+            self._authorize(save_cookies=self._save_cookies)
 
     def _top_similar_item_by_sku(self, wb_sku: int) -> int:
         """
@@ -135,8 +143,6 @@ class Parser:
                 kw_json[keyword] = int(kw_count.replace(" ", ""))
 
             self._driver.execute_script("arguments[0].scrollTop += 100;", scroll_table)
-
-        # json.dump(kw_json, open("keywords.json", "w", encoding="utf8"), ensure_ascii=False, indent=1)
         return kw_json
 
     def parse_mpstats_by_sku(self, wb_sku: int | str) -> List[str] | None:
@@ -145,6 +151,7 @@ class Parser:
         """
         try:
             self._auth_pipeline()
+            time.sleep(1200)
             top_item_sku = self._top_similar_item_by_sku(wb_sku=wb_sku)
             result = self._get_keywords(top_item_sku)
             self._driver.quit()
@@ -203,3 +210,6 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
+
+
+Parser(headless=False).parse_mpstats_by_sku(48296880)

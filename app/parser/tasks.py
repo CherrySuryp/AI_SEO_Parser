@@ -62,7 +62,7 @@ def get_info_v2(wb_sku: str | int):
     time_limit=125,
 )
 def get_info_by_name(wb_sku: str | int):
-    keywords = Parser().parse_mpstats_by_name(wb_sku)
+    keywords = Parser(headless=False).parse_mpstats_by_name(wb_sku)
     if not keywords:
         raise NoKeywordsException("No keywords")
     result = {"name": None, "params": None, "desc": None, "keywords": keywords}
