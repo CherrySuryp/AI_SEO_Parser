@@ -9,6 +9,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium_stealth import stealth
+
 
 from fake_useragent import UserAgent
 
@@ -28,12 +30,24 @@ class Parser:
 
         chrome_service = webdriver.ChromeService(executable_path=chromedriver)
         options = webdriver.ChromeOptions()
-        options.add_argument(f"user-agent={UserAgent().googlechrome}")
+        # options.add_argument(f"user-agent={UserAgent().edge}")
+        options.add_argument(f"user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
         options.add_argument("--headless") if headless else None
+
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
 
         self._driver = webdriver.Chrome(options=options, service=chrome_service)
+        stealth(self._driver,
+                languages=["en-US", "en"],
+                vendor="Google Inc.",
+                platform="Win32",
+                webgl_vendor="Intel Inc.",
+                renderer="Intel Iris OpenGL Engine",
+                fix_hairline=True,
+                )
 
         self._driver.maximize_window()
         # self._driver.set_window_size(1000, 600)
@@ -55,16 +69,11 @@ class Parser:
         """
         Авторизация на сайте с сохранением cookie в файл
         """
-        self._driver.get("https://mpstats.io")
-        time.sleep(2)
-        self._driver.get("https://mpstats.io/login")
+        self._driver.get("https://kz.mpstats.io/login")
         email_input = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_element_located((By.ID, "email"))
         )
-        passwd_input = WebDriverWait(self._driver, 10).until(
-            ec.visibility_of_element_located((By.NAME, "password"))
-        )
-
+        passwd_input = self._driver.find_element(By.NAME, "password")
         email_input.clear()
         email_input.send_keys(self._settings.MPSTATS_LOGIN)
         passwd_input.clear()
@@ -97,7 +106,7 @@ class Parser:
         """
         Переход к ТОП-1 похожему товару
         """
-        self._driver.get(f"https://mpstats.io/wb/item/{wb_sku}")
+        self._driver.get(f"https://kz.mpstats.io/wb/item/{wb_sku}")
         elements = self._driver.find_elements(
             By.XPATH, "//a[@href and @title='Открыть в Wildberries' and " "@target='_blank']"
         )
@@ -105,7 +114,7 @@ class Parser:
 
     def _top_similar_item_by_item_name(self, item_name: str) -> int:
         item_name = "+".join(item_name.split(" "))
-        self._driver.get(f"https://mpstats.io/wb/bysearch?query={item_name}")
+        self._driver.get(f"https://kz.mpstats.io/wb/bysearch?query={item_name}")
         elements = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_any_elements_located(
                 (
@@ -120,7 +129,7 @@ class Parser:
         """
         Парсинг ключевых слов со страницы https://mpstats.io/wb/item/{sku}
         """
-        self._driver.get(f"https://mpstats.io/wb/item/{sku}")
+        self._driver.get(f"https://kz.mpstats.io/wb/item/{sku}")
         self._driver.execute_script("document.body.style.zoom = '30%'")
 
         kw_json = {}
@@ -151,6 +160,7 @@ class Parser:
         """
         try:
             self._auth_pipeline()
+            time.sleep(5)
             top_item_sku = self._top_similar_item_by_sku(wb_sku=wb_sku)
             result = self._get_keywords(top_item_sku)
             self._driver.quit()
@@ -209,3 +219,6 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
+
+
+print(Parser(headless=False).parse_mpstats_by_sku(31207272))
