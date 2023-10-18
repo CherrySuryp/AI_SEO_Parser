@@ -151,7 +151,6 @@ class Parser:
         """
         try:
             self._auth_pipeline()
-            time.sleep(1200)
             top_item_sku = self._top_similar_item_by_sku(wb_sku=wb_sku)
             result = self._get_keywords(top_item_sku)
             self._driver.quit()
@@ -210,6 +209,3 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
-
-
-Parser(headless=False).parse_mpstats_by_sku(48296880)
