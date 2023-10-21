@@ -23,10 +23,12 @@ class Parser:
         self._keywords_count = keywords_count
 
         chromedriver = os.path.join(os.path.dirname(os.path.realpath(__file__)), "chromedriver")
+        user_agent = UserAgent().chrome
+        print(user_agent)
 
         chrome_service = webdriver.ChromeService(executable_path=chromedriver)
         options = webdriver.ChromeOptions()
-        options.add_argument(f"user-agent={UserAgent().googlechrome}")
+        options.add_argument(f"user-agent={user_agent}")
         options.add_argument("--headless") if headless else None
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -83,7 +85,13 @@ class Parser:
 
         else:
             print("Getting cookies")
-            self._authorize(save_cookies=True)
+            self._authorize(save_cookies=False)
+            WebDriverWait(self._driver, 10).until(
+                ec.visibility_of_element_located(
+                    (By.CLASS_NAME, "top-menu__desktop")
+                )
+            )
+            print("Authorized")
 
     def _top_similar_item_by_sku(self, wb_sku: int) -> int:
         """
@@ -203,3 +211,6 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
+
+
+# print(Parser(headless=False).parse_mpstats_by_name("Подушка"))
