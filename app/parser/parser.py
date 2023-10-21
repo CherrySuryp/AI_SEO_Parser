@@ -3,11 +3,13 @@ import pickle
 
 from typing import Dict, List
 
-from selenium import webdriver
+from selenium import webdriver as selenium
+from seleniumwire import webdriver as selwire
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 
 from fake_useragent import UserAgent
 
@@ -26,14 +28,29 @@ class Parser:
         user_agent = UserAgent().chrome
         print(user_agent)
 
-        chrome_service = webdriver.ChromeService(executable_path=chromedriver)
-        options = webdriver.ChromeOptions()
+        proxy_path = "195.190.12.57:8000"
+        proxy_user = "6JN86b"
+        proxy_pass = "3mTC0d"
+
+        chrome_service = selenium.ChromeService(executable_path=chromedriver)
+        options = selenium.ChromeOptions()
         options.add_argument(f"user-agent={user_agent}")
         options.add_argument("--headless") if headless else None
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        self._driver = webdriver.Chrome(options=options, service=chrome_service)
+        seleniumwire_options = {
+            'proxy': {
+                'http': f'https://{proxy_user}:{proxy_pass}@{proxy_path}',
+                'verify_ssl': False,
+            },
+        }
+
+        self._driver = selwire.Chrome(
+            options=options,
+            service=chrome_service,
+            seleniumwire_options=seleniumwire_options
+        )
 
         self._driver.maximize_window()
         # self._driver.set_window_size(1000, 600)
@@ -212,5 +229,4 @@ class Parser:
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
 
-
-# print(Parser(headless=False).parse_mpstats_by_name("Подушка"))
+print(Parser(headless=False).parse_mpstats_by_name("Подушка"))
