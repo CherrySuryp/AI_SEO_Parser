@@ -45,7 +45,6 @@ class Parser:
             age = WebDriverWait(self._driver, 10).until(
                 ec.visibility_of_element_located((By.CLASS_NAME, "popup-confirm-age"))
             )
-            print(age)
             age.find_element(By.TAG_NAME, "button").click()
         except TimeoutException:
             pass
@@ -88,3 +87,6 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
+
+
+# Parser(headless=False).get_wb_item_name("95994935")
