@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.common.exceptions import TimeoutException
 
 from fake_useragent import UserAgent
 from selenium_stealth import stealth
@@ -39,8 +40,19 @@ class Parser:
             run_on_insecure_origins=True
         )
 
+    def wb_confirm_age(self):
+        try:
+            age = WebDriverWait(self._driver, 10).until(
+                ec.visibility_of_element_located((By.CLASS_NAME, "popup-confirm-age"))
+            )
+            print(age)
+            age.find_element(By.TAG_NAME, "button").click()
+        except TimeoutException:
+            pass
+
     def get_wb_item_name(self, sku: str | int) -> str:
         self._driver.get(f"https://www.wildberries.ru/catalog/{sku}/detail.aspx")
+        self.wb_confirm_age()
         product_name = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_element_located((By.CSS_SELECTOR, 'h1[data-link="text{:selectedNomenclature^goodsName}"]'))
         )
@@ -48,8 +60,9 @@ class Parser:
 
     def get_wb_item_params(self, sku: str | int) -> Dict[str, str]:
         self._driver.get(f"https://www.wildberries.ru/catalog/{sku}/detail.aspx")
+        self.wb_confirm_age()
 
-        button = WebDriverWait(self._driver, 10).until(
+        button = WebDriverWait(self._driver, 20).until(
             ec.visibility_of_element_located((By.XPATH, "// button[text() = 'Развернуть характеристики']"))
         )
         self._driver.execute_script("arguments[0].scrollIntoView();", button)
@@ -66,6 +79,7 @@ class Parser:
 
     def get_wb_item_desc(self, sku: str | int) -> str:
         self._driver.get(f"https://www.wildberries.ru/catalog/{sku}/detail.aspx")
+        self.wb_confirm_age()
 
         button = WebDriverWait(self._driver, 10).until(
             ec.visibility_of_element_located((By.XPATH, "// button[text() = 'Развернуть описание']"))
@@ -74,4 +88,3 @@ class Parser:
         button.click()
 
         return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
-
