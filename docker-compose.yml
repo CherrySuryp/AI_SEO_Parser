@@ -9,7 +9,7 @@ services:
     container_name: celery_mpstats
     build:
       context: .
-    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO",
+    command: ["celery", "-A", "app.queue", "worker", "--loglevel=INFO",
               "--pool=gevent", "--concurrency=1"]
     depends_on:
       - redis

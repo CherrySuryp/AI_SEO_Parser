@@ -3,8 +3,8 @@ from typing import Literal, Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from app.celery_app import get_celery_result
-from app.parser.tasks import get_info_v1, get_info_v2, get_info_by_name
+from app.queue import get_celery_result
+from app.parser.tasks import get_info_v1, get_info_v2, get_info_by_name, get_info_only_keywords
 
 router = APIRouter(tags=["Parser"])
 
@@ -26,9 +26,11 @@ class TaskResult(BaseModel):
 
 
 @router.post("/{wb_sku}", response_model=TaskStatus)
-async def parse_data(wb_sku: str | int, mode: Literal["v1", "v1.2", "by_name"]):
+async def parse_data(wb_sku: str | int, mode: Literal["only_keywords", "v1", "v1.2", "by_name"]):
     try:
-        if mode == "v1":
+        if mode == "only_keywords":
+            task = get_info_only_keywords.delay(wb_sku=wb_sku)
+        elif mode == "v1":
             task = get_info_v1.delay(wb_sku=wb_sku)
         elif mode == "v1.2":
             task = get_info_v2.delay(wb_sku=wb_sku)
