@@ -1,4 +1,5 @@
 import os
+import time
 
 from typing import Dict
 
@@ -53,7 +54,7 @@ class Parser:
         self._driver.get(f"https://www.wildberries.ru/catalog/{sku}/detail.aspx")
         self.wb_confirm_age()
         product_name = WebDriverWait(self._driver, 10).until(
-            ec.visibility_of_element_located((By.CSS_SELECTOR, 'h1[data-link="text{:selectedNomenclature^goodsName}"]'))
+            ec.visibility_of_element_located((By.CLASS_NAME, 'product-page__title'))
         )
         return str(product_name.text)
 
@@ -62,10 +63,12 @@ class Parser:
         self.wb_confirm_age()
 
         button = WebDriverWait(self._driver, 20).until(
-            ec.visibility_of_element_located((By.XPATH, "// button[text() = 'Развернуть характеристики']"))
+            ec.visibility_of_element_located((By.CLASS_NAME, "product-page__btn-detail"))
         )
         self._driver.execute_script("arguments[0].scrollIntoView();", button)
         button.click()
+
+        time.sleep(3)
 
         product_params_decor = self._driver.find_elements(By.CLASS_NAME, "product-params__cell-decor")
         product_params_info = self._driver.find_elements(By.CLASS_NAME, "product-params__cell")
@@ -79,14 +82,16 @@ class Parser:
     def get_wb_item_desc(self, sku: str | int) -> str:
         self._driver.get(f"https://www.wildberries.ru/catalog/{sku}/detail.aspx")
         self.wb_confirm_age()
-
-        button = WebDriverWait(self._driver, 10).until(
-            ec.visibility_of_element_located((By.XPATH, "// button[text() = 'Развернуть описание']"))
+        button = WebDriverWait(self._driver, 20).until(
+            ec.visibility_of_element_located((By.CLASS_NAME, "product-page__btn-detail"))
         )
         self._driver.execute_script("arguments[0].scrollIntoView();", button)
         button.click()
+        time.sleep(3)
 
-        return self._driver.find_element(By.CLASS_NAME, "collapsable__text").text
+        desc = self._driver.find_element(By.CLASS_NAME, "option__text").text
+        return desc
 
 
-# Parser(headless=False).get_wb_item_name("95994935")
+# result = (Parser(headless=False).get_wb_item_desc("95994935"))
+# print(result)
